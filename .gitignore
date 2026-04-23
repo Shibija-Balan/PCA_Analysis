@@ -1,0 +1,12 @@
+.Rproj.user
+.Rhistory
+.RData
+.Ruserdata
+.DS_Store
+*.html
+*.pdf
+
+# Required submission artefacts must remain trackable.
+!coursework_02.md
+!coursework_02_files/
+!coursework_02_files/**

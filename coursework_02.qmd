@@ -1,0 +1,204 @@
+---
+title: "Coursework 2"
+subtitle: "MA22019 Introduction to Data Science"
+format: gfm
+editor: visual
+---
+
+<!--- DO NOT DELETE THIS LINE --->
+<!--- METADATA ANCHOR: MA22019-CW2-2026 --->
+
+# Data Preparation Notes
+
+<!--- DO NOT DELETE THIS LINE - DATA PREPARATION NOTES ANCHOR --->
+
+Briefly document the main data-handling decisions that matter for your
+analysis. This section may be short prose or one small table.
+
+```{r}
+#| label: data-preparation-code
+# Write your data-preparation code here.
+```
+
+Write your `Data Preparation Notes` answer here.
+
+# Task 1
+
+<!--- DO NOT DELETE THIS LINE - TASK 1 ANCHOR --->
+
+Identify and investigate the most important spatial patterns in the incident
+data.
+
+```{r}
+#| label: task-1-code
+# Write your Task 1 code here.
+```
+
+Write your Task 1 answer here.
+
+# Task 2
+
+<!--- DO NOT DELETE THIS LINE - TASK 2 ANCHOR --->
+
+Use the available neighbourhood data to develop and justify possible
+explanations for the patterns you identified.
+
+```{r}
+#| label: task-2-code
+# Write your Task 2 code here.
+```
+
+Write your Task 2 answer here.
+
+# Task 3
+
+<!--- DO NOT DELETE THIS LINE - TASK 3 ANCHOR --->
+
+Make a small number of evidence-based recommendations for priority areas or
+actions.
+
+```{r}
+#| label: task-3-code
+# Write your Task 3 code here.
+```
+
+Write your Task 3 answer here.
+
+# References
+
+<!--- DO NOT DELETE THIS LINE - REFERENCES ANCHOR --->
+
+Add references only if needed.
+
+```{r}
+#| label: word-count-check
+#| echo: false
+#| message: false
+#| warning: false
+
+resolve_word_count_input <- function() {
+  current_input <- tryCatch(
+    knitr::current_input(),
+    error = function(e) NA_character_
+  )
+
+  if (!is.na(current_input) && nzchar(current_input) && file.exists(current_input)) {
+    return(current_input)
+  }
+
+  if (file.exists("coursework_02.qmd")) {
+    return("coursework_02.qmd")
+  }
+
+  stop(
+    paste(
+      "Could not locate coursework_02.qmd.",
+      "Render the document from inside the coursework project folder."
+    )
+  )
+}
+
+extract_chunk_captions <- function(chunk_lines) {
+  caption_lines <- grep(
+    "^#\\|\\s*(fig-cap|tbl-cap|lst-cap)\\s*:",
+    chunk_lines,
+    value = TRUE
+  )
+
+  if (length(caption_lines) == 0) {
+    return(character(0))
+  }
+
+  trimws(sub("^#\\|\\s*(fig-cap|tbl-cap|lst-cap)\\s*:\\s*", "", caption_lines))
+}
+
+count_policy_words <- function(text) {
+  if (length(text) == 0) {
+    return(0L)
+  }
+
+  text <- paste(text, collapse = " ")
+  text <- gsub("`[^`]*`", " ", text, perl = TRUE)
+  text <- gsub("\\[[^\\]]*\\]\\([^\\)]*\\)", " ", text, perl = TRUE)
+  text <- gsub("https?://\\S+", " ", text, perl = TRUE)
+  text <- gsub("[*_~#>]", " ", text, perl = TRUE)
+
+  tokens <- regmatches(
+    text,
+    gregexpr("[[:alnum:]]+(?:[-'][[:alnum:]]+)*", text, perl = TRUE)
+  )[[1]]
+
+  if (length(tokens) == 1 && identical(tokens, character(0))) {
+    return(0L)
+  }
+
+  length(tokens)
+}
+
+count_prose_words <- function(file_path) {
+  lines <- readLines(file_path, warn = FALSE)
+
+  yaml_bounds <- grep("^---\\s*$", lines)
+  if (length(yaml_bounds) >= 2) {
+    lines <- lines[-seq.int(yaml_bounds[1], yaml_bounds[2])]
+  }
+
+  reference_heading <- grep("^#\\s+References\\s*$", lines)
+  if (length(reference_heading) > 0) {
+    lines <- lines[seq_len(reference_heading[1] - 1)]
+  }
+
+  prose_lines <- character(0)
+  caption_lines <- character(0)
+  in_chunk <- FALSE
+  current_chunk <- character(0)
+
+  for (line in lines) {
+    if (grepl("^```", line)) {
+      if (!in_chunk) {
+        in_chunk <- TRUE
+        current_chunk <- character(0)
+      } else {
+        caption_lines <- c(caption_lines, extract_chunk_captions(current_chunk))
+        in_chunk <- FALSE
+        current_chunk <- character(0)
+      }
+      next
+    }
+
+    if (in_chunk) {
+      current_chunk <- c(current_chunk, line)
+      next
+    }
+
+    trimmed <- trimws(line)
+    if (
+      trimmed == "" ||
+      grepl("^<!--", trimmed) ||
+      grepl("^#+\\s+", trimmed)
+    ) {
+      next
+    }
+
+    prose_lines <- c(prose_lines, line)
+  }
+
+  total_words <- count_policy_words(prose_lines) + count_policy_words(caption_lines)
+  total_words
+}
+
+true_word_count <- count_prose_words(resolve_word_count_input())
+word_limit <- 1000L
+status_text <- if (true_word_count <= word_limit) "under" else "over"
+delta <- abs(word_limit - true_word_count)
+
+cat(
+  sprintf(
+    "**Prose Word Count:** %d words (%d words %s the %d-word limit)",
+    true_word_count,
+    delta,
+    status_text,
+    word_limit
+  )
+)
+```
