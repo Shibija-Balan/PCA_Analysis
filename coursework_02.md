@@ -29,25 +29,20 @@ na_summary <- tibble(dataset = c("incidents", "ward profiles", "ward polygons"),
 profiles_clean <- profiles %>%
   mutate(rental_share = parse_number(rental_share),
          ward_name = str_replace_all(ward_name, "-" , " "))
-
-na_summary
 ```
 
-    # A tibble: 3 × 2
-      dataset       missing_values
-      <chr>                  <int>
-    1 incidents                  0
-    2 ward profiles              6
-    3 ward polygons              0
-
 I loaded the ward boundary polygons, ward profile data and incident
-reports. The incident and ward polygon files had no missing values,
-while the ward profile file had 6 missing values; these were retained
-and handled using available cases where relevant. I converted
-rental_share from percentage text to a numeric variable. I also
-standardized ward names in the profile file by replacing hyphens with
-spaces, although later joins use ward_id rather than ward_name to avoid
-relying on name formatting.
+reports.
+
+The incident and ward polygon files had no missing values, while the
+ward profile file had 6 missing values; these were retained and handled
+using available cases where relevant.
+
+I converted rental_share from percentage text to a numeric variable.
+
+I also standardized ward names in the profile file by replacing hyphens
+with spaces, although later joins use ward_id rather than ward_name to
+avoid relying on name formatting.
 
 # Task 1
 
@@ -85,35 +80,34 @@ wards_incident <- wards %>%
          area_km2 = as.numeric(st_area(geometry))/1000000,
          incident_density =  n_incidents / area_km2)
 
-#kernel-smoothed intensity for ppp and quadrat with 4cm
+#kernel-smoothed intensity for ppp and quadrat
 wards_window <- as.owin(st_union(wards))
 incident_coords = st_coordinates(incidents_sf)
+incident_ppp <-  ppp( x = incident_coords[,1] , y =incident_coords[,2] , window = wards_window)
 
-incident_ppp = ppp( x = incident_coords[,1] , y =incident_coords[,2] , window = wards_window)
-
+incident_intensity <-  density.ppp( x = incident_ppp , edge= TRUE)
 incident_quadrat6 <- quadratcount( incident_ppp, nx=6 , ny=6 )
-plot(incident_ppp,pch = 16,cex = 0.25,main = "Quadrat counts of reported incidents")
+
+par(mfrow = c(1,2))
+plot(incident_ppp, main = "", pch=16, cex=0.25)
+title("Quadrat counts", line = 1.5)
 plot(incident_quadrat6, add = TRUE)
 plot(st_geometry(wards),add = TRUE,lwd = 0.5)
-```
 
-![](coursework_02_files/figure-commonmark/task-1-code-1.png)
-
-``` r
-incident_intensity = density.ppp( x = incident_ppp , edge= TRUE)
-plot(incident_intensity,main = "Kernel-smoothed intensity of reported incidents")
+plot(incident_intensity,main = "")
+title("Kernel intensity", line = 1.5)
 plot(st_geometry(wards),add = TRUE,lwd = 0.5)
 plot(incident_ppp, add = TRUE, pch = 16,cex = 0.25)
 ```
 
-![](coursework_02_files/figure-commonmark/task-1-code-2.png)
+![](coursework_02_files/figure-commonmark/task-1-code-1.png)
 
 ``` r
 top_wards <- wards_incident %>% 
   st_drop_geometry() %>% 
   arrange(desc(n_incidents)) %>% 
   select(ward_id,ward_name, n_incidents, incident_density) %>% 
-  slice_head(n=10)
+  slice_head(n=5)
 
 top_wards %>%
   mutate(incident_density = round(incident_density, 1)) %>%
@@ -123,18 +117,13 @@ top_wards %>%
   )
 ```
 
-| Ward ID | Ward         | Incidents | Incident density |
-|:--------|:-------------|----------:|-----------------:|
-| W17     | Maple Cross  |       337 |            222.9 |
-| W25     | Saffron Lea  |       110 |            111.9 |
-| W08     | Market End   |        96 |             17.8 |
-| W11     | Hazel Row    |        95 |             55.6 |
-| W16     | Foxley       |        57 |             59.0 |
-| W26     | Mill Court   |        38 |             17.1 |
-| W13     | East Hollow  |        34 |             34.3 |
-| W02     | Riverstead   |        33 |              9.1 |
-| W28     | Falcon Heath |        27 |              8.8 |
-| W22     | Willow Bank  |        26 |              7.1 |
+| Ward ID | Ward        | Incidents | Incident density |
+|:--------|:------------|----------:|-----------------:|
+| W17     | Maple Cross |       337 |            222.9 |
+| W25     | Saffron Lea |       110 |            111.9 |
+| W08     | Market End  |        96 |             17.8 |
+| W11     | Hazel Row   |        95 |             55.6 |
+| W16     | Foxley      |        57 |             59.0 |
 
 Highest incident wards by coordinate-based ward assignment.
 
@@ -167,6 +156,14 @@ top_5_share
       share
       <dbl>
     1  70.4
+
+I converted the incident coordinates into an sf point layer using the
+same CRS as the ward polygons, then spatially joined each incident to
+the ward polygon containing it. This was preferred to relying only on
+the recorded ward name because 39 incidents had a recorded ward name
+that differed from the coordinate-based ward assignment. Subsequent ward
+counts therefore use the spatially assigned ward, so the analysis
+reflects the actual incident locations.
 
 The incident records were treated as point pattern data, since each row
 records an event location. A 6 × 6 quadrat count showed strong spatial
@@ -235,18 +232,7 @@ scree_plot
 
 ``` r
 library(patchwork)
-```
 
-    Warning: package 'patchwork' was built under R version 4.4.3
-
-
-    Attaching package: 'patchwork'
-
-    The following object is masked from 'package:spatstat.geom':
-
-        area
-
-``` r
 loadings <- data.frame(
     variable = rownames(profile_pca$rotation),
     PC1 = profile_pca$rotation[, 1],
@@ -357,31 +343,8 @@ exemplery_wards <-  wards_data_pca %>%
 
 
 priority_wards
-```
-
-    # A tibble: 2 × 14
-      ward_name   n_incidents incident_density   PC1    PC2 profile_score
-      <chr>             <int>            <dbl> <dbl>  <dbl>         <dbl>
-    1 Maple Cross         337             223.  3.08 -0.814          3.90
-    2 Saffron Lea         110             112.  1.21 -1.35           2.56
-    # ℹ 8 more variables: unemployment_rate <dbl>, deprivation_score <dbl>,
-    #   rental_share <dbl>, population_density <dbl>, transport_access <dbl>,
-    #   lighting_coverage <dbl>, distance_police_hub <dbl>,
-    #   listed_building_share <dbl>
-
-``` r
 exemplery_wards
 ```
-
-    # A tibble: 2 × 14
-      ward_name    n_incidents incident_density   PC1    PC2 profile_score
-      <chr>              <int>            <dbl> <dbl>  <dbl>         <dbl>
-    1 Bracken Vale           0                0 -3.54 -0.394         -3.15
-    2 Canal Side             0                0 -2.94 -0.733         -2.20
-    # ℹ 8 more variables: unemployment_rate <dbl>, deprivation_score <dbl>,
-    #   rental_share <dbl>, population_density <dbl>, transport_access <dbl>,
-    #   lighting_coverage <dbl>, distance_police_hub <dbl>,
-    #   listed_building_share <dbl>
 
 The clearest priority areas are Maple Cross and Saffron Lea. Maple Cross
 had 337 incidents and 222.9 incidents per km², while Saffron Lea had 110
@@ -412,4 +375,4 @@ fixes.
 
 Add references only if needed.
 
-    **Prose Word Count:** 748 words (252 words under the 1000-word limit)
+    **Prose Word Count:** 820 words (180 words under the 1000-word limit)
