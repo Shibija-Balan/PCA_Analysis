@@ -334,7 +334,7 @@ priority_wards <- wards_data_pca %>%
   select(ward_name , n_incidents , incident_density , PC1 , PC2 , profile_score,unemployment_rate, deprivation_score, rental_share, population_density, transport_access, lighting_coverage, distance_police_hub, listed_building_share  ) %>% 
   slice_head(n=2)
 
-exemplery_wards <-  wards_data_pca %>% 
+exemplary_wards <-  wards_data_pca %>% 
   st_drop_geometry() %>% 
   mutate( profile_score = PC1-PC2) %>% 
   arrange(desc(incident_density)) %>% 
@@ -343,31 +343,35 @@ exemplery_wards <-  wards_data_pca %>%
 
 
 priority_wards
-exemplery_wards
+exemplary_wards
 ```
 
 The clearest priority areas are Maple Cross and Saffron Lea. Maple Cross
 had 337 incidents and 222.9 incidents per km², while Saffron Lea had 110
-incidents and 111.9 incidents per km². Both are also further from the
-police hub than the zero-incident comparison wards: Maple Cross has
-police-hub distance 5 and Saffron Lea 4, compared with 0 in Bracken Vale
-and 1 in Canal Side. Since distance from the police hub was moderately
-positively associated with incident density (r = 0.417), the main
-recommendation is to consider a local police response point, satellite
-hub, or revised patrol/response coverage for the north-east/eastern
-hotspot.
+incidents and 111.9 incidents per km². Both also had positive PCA
+profile scores, while the comparison wards Bracken Vale and Canal Side
+had no incidents and negative profile scores.
 
-A second recommendation is to improve lighting coverage, especially in
-Maple Cross. Maple Cross and Saffron Lea have lower lighting coverage,
-58.1 and 65.4, than the zero-incident comparison wards Bracken Vale and
-Canal Side, 97.1 and 96.4. Lighting coverage also contributed negatively
-to PC1, the social-pressure and weaker-safety-infrastructure component.
-However, because the direct correlation between lighting coverage and
-incident density was weak, lighting should be treated as a supporting
-intervention rather than the sole explanation. Deprivation and
-unemployment strengthen the case for prioritising these wards, but they
-are longer-term structural issues rather than immediate operational
-fixes.
+The PCA evidence suggests that the most relevant short-term actions are
+linked to safety infrastructure rather than broad structural variables.
+PC1 loaded positively on distance from the police hub and negatively on
+lighting coverage, so higher PC1 scores partly reflect wards that are
+further from police infrastructure and less well lit. Maple Cross had
+police-hub distance 5 and lighting coverage 58.1, while Saffron Lea had
+distance 4 and lighting coverage 65.4. In contrast, Bracken Vale and
+Canal Side had police-hub distances 0 and 1 and lighting coverage 97.1
+and 96.4.
+
+The main recommendation is therefore to prioritise local police response
+coverage in the Maple Cross/Saffron Lea hotspot, for example through a
+satellite response point, patrol routing, or local reporting access. A
+second recommendation is to review lighting coverage, especially in
+Maple Cross.
+
+Deprivation and unemployment support the case for prioritising these
+wards, but they are longer-term structural issues rather than immediate
+operational fixes. These recommendations are priorities for
+investigation and intervention, not causal claims.v
 
 # References
 
@@ -375,4 +379,4 @@ fixes.
 
 Add references only if needed.
 
-    **Prose Word Count:** 820 words (180 words under the 1000-word limit)
+    **Prose Word Count:** 840 words (160 words under the 1000-word limit)
