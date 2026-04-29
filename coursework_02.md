@@ -118,23 +118,23 @@ top_wards <- wards_incident %>%
 top_wards %>%
   mutate(incident_density = round(incident_density, 1)) %>%
   kable(
-    col.names = c("Ward ID", "Ward", "Incidents", "Incidents per km²"),
+    col.names = c("Ward ID", "Ward", "Incidents", "Incident density"),
     caption = "Highest incident wards by coordinate-based ward assignment."
   )
 ```
 
-| Ward ID | Ward         | Incidents | Incidents per km² |
-|:--------|:-------------|----------:|------------------:|
-| W17     | Maple Cross  |       337 |             222.9 |
-| W25     | Saffron Lea  |       110 |             111.9 |
-| W08     | Market End   |        96 |              17.8 |
-| W11     | Hazel Row    |        95 |              55.6 |
-| W16     | Foxley       |        57 |              59.0 |
-| W26     | Mill Court   |        38 |              17.1 |
-| W13     | East Hollow  |        34 |              34.3 |
-| W02     | Riverstead   |        33 |               9.1 |
-| W28     | Falcon Heath |        27 |               8.8 |
-| W22     | Willow Bank  |        26 |               7.1 |
+| Ward ID | Ward         | Incidents | Incident density |
+|:--------|:-------------|----------:|-----------------:|
+| W17     | Maple Cross  |       337 |            222.9 |
+| W25     | Saffron Lea  |       110 |            111.9 |
+| W08     | Market End   |        96 |             17.8 |
+| W11     | Hazel Row    |        95 |             55.6 |
+| W16     | Foxley       |        57 |             59.0 |
+| W26     | Mill Court   |        38 |             17.1 |
+| W13     | East Hollow  |        34 |             34.3 |
+| W02     | Riverstead   |        33 |              9.1 |
+| W28     | Falcon Heath |        27 |              8.8 |
+| W22     | Willow Bank  |        26 |              7.1 |
 
 Highest incident wards by coordinate-based ward assignment.
 
@@ -341,10 +341,70 @@ Make a small number of evidence-based recommendations for priority areas
 or actions.
 
 ``` r
-# Write your Task 3 code here.
+priority_wards <- wards_data_pca %>% 
+  st_drop_geometry() %>% 
+  mutate( profile_score = PC1-PC2) %>% 
+  arrange(desc(incident_density)) %>% 
+  select(ward_name , n_incidents , incident_density , PC1 , PC2 , profile_score,unemployment_rate, deprivation_score, rental_share, population_density, transport_access, lighting_coverage, distance_police_hub, listed_building_share  ) %>% 
+  slice_head(n=2)
+
+exemplery_wards <-  wards_data_pca %>% 
+  st_drop_geometry() %>% 
+  mutate( profile_score = PC1-PC2) %>% 
+  arrange(desc(incident_density)) %>% 
+  select(ward_name , n_incidents , incident_density , PC1 , PC2 , profile_score,unemployment_rate, deprivation_score, rental_share, population_density, transport_access, lighting_coverage, distance_police_hub, listed_building_share  ) %>% 
+  slice_tail(n=2)
+
+
+priority_wards
 ```
 
-Write your Task 3 answer here.
+    # A tibble: 2 × 14
+      ward_name   n_incidents incident_density   PC1    PC2 profile_score
+      <chr>             <int>            <dbl> <dbl>  <dbl>         <dbl>
+    1 Maple Cross         337             223.  3.08 -0.814          3.90
+    2 Saffron Lea         110             112.  1.21 -1.35           2.56
+    # ℹ 8 more variables: unemployment_rate <dbl>, deprivation_score <dbl>,
+    #   rental_share <dbl>, population_density <dbl>, transport_access <dbl>,
+    #   lighting_coverage <dbl>, distance_police_hub <dbl>,
+    #   listed_building_share <dbl>
+
+``` r
+exemplery_wards
+```
+
+    # A tibble: 2 × 14
+      ward_name    n_incidents incident_density   PC1    PC2 profile_score
+      <chr>              <int>            <dbl> <dbl>  <dbl>         <dbl>
+    1 Bracken Vale           0                0 -3.54 -0.394         -3.15
+    2 Canal Side             0                0 -2.94 -0.733         -2.20
+    # ℹ 8 more variables: unemployment_rate <dbl>, deprivation_score <dbl>,
+    #   rental_share <dbl>, population_density <dbl>, transport_access <dbl>,
+    #   lighting_coverage <dbl>, distance_police_hub <dbl>,
+    #   listed_building_share <dbl>
+
+The clearest priority areas are Maple Cross and Saffron Lea. Maple Cross
+had 337 incidents and 222.9 incidents per km², while Saffron Lea had 110
+incidents and 111.9 incidents per km². Both are also further from the
+police hub than the zero-incident comparison wards: Maple Cross has
+police-hub distance 5 and Saffron Lea 4, compared with 0 in Bracken Vale
+and 1 in Canal Side. Since distance from the police hub was moderately
+positively associated with incident density (r = 0.417), the main
+recommendation is to consider a local police response point, satellite
+hub, or revised patrol/response coverage for the north-east/eastern
+hotspot.
+
+A second recommendation is to improve lighting coverage, especially in
+Maple Cross. Maple Cross and Saffron Lea have lower lighting coverage,
+58.1 and 65.4, than the zero-incident comparison wards Bracken Vale and
+Canal Side, 97.1 and 96.4. Lighting coverage also contributed negatively
+to PC1, the social-pressure and weaker-safety-infrastructure component.
+However, because the direct correlation between lighting coverage and
+incident density was weak, lighting should be treated as a supporting
+intervention rather than the sole explanation. Deprivation and
+unemployment strengthen the case for prioritising these wards, but they
+are longer-term structural issues rather than immediate operational
+fixes.
 
 # References
 
@@ -352,4 +412,4 @@ Write your Task 3 answer here.
 
 Add references only if needed.
 
-    **Prose Word Count:** 548 words (452 words under the 1000-word limit)
+    **Prose Word Count:** 748 words (252 words under the 1000-word limit)
