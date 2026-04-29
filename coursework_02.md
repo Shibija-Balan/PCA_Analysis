@@ -311,13 +311,15 @@ population-density contrast.
 The spatial maps of PC1 and PC2 scores partly align with the incident
 pattern from Task 1. High PC1 scores occur across the northern part of
 the city, while low PC2 scores, corresponding to higher population
-density, are more evident towards the east. This is consistent with the
+density (because PC2 had a large negative population-density loading)
+are more evident towards the east. This is consistent with the
 north-east/eastern incident hotspot being associated with both social
-pressure and density. However, the associations with incident density
-are only moderate: r = 0.420 for PC1 and r = -0.391 for PC2. Therefore,
-the ward-profile variables provide partial support for the hotspot
-explanation, but they do not fully explain the sharp concentration of
-incidents.
+pressure and density.
+
+However, the associations with incident density are only moderate: r =
+0.420 for PC1 and r = -0.391 for PC2. Therefore, the ward-profile
+variables provide partial support for the hotspot explanation, but they
+do not fully explain the sharp concentration of incidents.
 
 # Task 3
 
@@ -341,9 +343,34 @@ exemplary_wards <-  wards_data_pca %>%
   select(ward_name , n_incidents , incident_density , PC1 , PC2 , profile_score,unemployment_rate, deprivation_score, rental_share, population_density, transport_access, lighting_coverage, distance_police_hub, listed_building_share  ) %>% 
   slice_tail(n=2)
 
+task3_table <- bind_rows(
+  priority_wards %>% mutate(group = "Priority"),
+  exemplary_wards %>% mutate(group = "Comparison")
+) %>%
+  select(
+    group, ward_name, n_incidents, incident_density, profile_score,
+    PC1, PC2, deprivation_score, unemployment_rate,
+    lighting_coverage, distance_police_hub
+  )
 
-priority_wards
-exemplary_wards
+task3_table %>%
+  mutate(
+    incident_density = round(incident_density, 1),
+    profile_score = round(profile_score, 2),
+    PC1 = round(PC1, 2),
+    PC2 = round(PC2, 2),
+    deprivation_score = round(deprivation_score, 1),
+    unemployment_rate = round(unemployment_rate, 1),
+    lighting_coverage = round(lighting_coverage, 1),
+    distance_police_hub = round(distance_police_hub, 1)
+  ) %>%
+  kable(
+    col.names = c(
+      "Group", "Ward", "Incidents", "Incidents per km²", "Profile score",
+      "PC1", "PC2", "Deprivation", "Unemployment", "Lighting", "Police distance"
+    ),
+    caption = "Priority and comparison wards based on incident burden and PCA neighbourhood-profile evidence."
+  )
 ```
 
 The clearest priority areas are Maple Cross and Saffron Lea. Maple Cross
@@ -353,25 +380,24 @@ profile scores, while the comparison wards Bracken Vale and Canal Side
 had no incidents and negative profile scores.
 
 The PCA evidence suggests that the most relevant short-term actions are
-linked to safety infrastructure rather than broad structural variables.
-PC1 loaded positively on distance from the police hub and negatively on
-lighting coverage, so higher PC1 scores partly reflect wards that are
-further from police infrastructure and less well lit. Maple Cross had
-police-hub distance 5 and lighting coverage 58.1, while Saffron Lea had
-distance 4 and lighting coverage 65.4. In contrast, Bracken Vale and
-Canal Side had police-hub distances 0 and 1 and lighting coverage 97.1
-and 96.4.
+linked to safety infrastructure rather than broad structural
+variables.PC1 loaded positively on distance from the police hub and
+negatively on lighting coverage, so higher PC1 scores partly reflect
+wards that are further from police infrastructure and less well lit.
+Maple Cross had police-hub distance 5 and lighting coverage 58.1, while
+Saffron Lea had distance 4 and lighting coverage 65.4. In contrast,
+Bracken Vale and Canal Side had police-hub distances 0 and 1 and
+lighting coverage 97.1 and 96.4.
 
 The main recommendation is therefore to prioritise local police response
-coverage in the Maple Cross/Saffron Lea hotspot, for example through a
-satellite response point, patrol routing, or local reporting access. A
-second recommendation is to review lighting coverage, especially in
-Maple Cross.
+coverage in the Maple Cross/Saffron Lea hotspot, for example through
+patrol routing or a local reporting access. A second recommendation is
+to review lighting coverage, especially in Maple Cross.
 
 Deprivation and unemployment support the case for prioritising these
 wards, but they are longer-term structural issues rather than immediate
 operational fixes. These recommendations are priorities for
-investigation and intervention, not causal claims.v
+investigation and intervention, not causal claims.
 
 # References
 
@@ -379,4 +405,4 @@ investigation and intervention, not causal claims.v
 
 Add references only if needed.
 
-    **Prose Word Count:** 840 words (160 words under the 1000-word limit)
+    **Prose Word Count:** 844 words (156 words under the 1000-word limit)
