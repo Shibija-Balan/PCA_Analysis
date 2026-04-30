@@ -77,8 +77,8 @@ incident_counts <-  incidents_joined %>%
 wards_incident <- wards %>% 
   left_join(incident_counts %>% select(ward_id, n_incidents),by = "ward_id") %>%
   mutate(n_incidents = replace_na(n_incidents, 0),
-         area_km2 = as.numeric(st_area(geometry))/1000000,
-         incident_density =  n_incidents / area_km2)
+         area_m2 = as.numeric(st_area(geometry)),
+         incident_density =  n_incidents / area_m2)
 
 #kernel-smoothed intensity for ppp and quadrat
 wards_window <- as.owin(st_union(wards))
@@ -86,13 +86,6 @@ incident_coords = st_coordinates(incidents_sf)
 incident_ppp <-  ppp( x = incident_coords[,1] , y =incident_coords[,2] , window = wards_window)
 
 incident_intensity <-  density.ppp( x = incident_ppp , edge= TRUE)
-incident_quadrat6 <- quadratcount( incident_ppp, nx=6 , ny=6 )
-
-par(mfrow = c(1,2))
-plot(incident_ppp, main = "", pch=16, cex=0.25)
-title("Quadrat counts", line = 1.5)
-plot(incident_quadrat6, add = TRUE)
-plot(st_geometry(wards),add = TRUE,lwd = 0.5)
 
 plot(incident_intensity,main = "")
 title("Kernel intensity", line = 1.5)
@@ -103,31 +96,23 @@ plot(incident_ppp, add = TRUE, pch = 16,cex = 0.25)
 ![](coursework_02_files/figure-commonmark/task-1-code-1.png)
 
 ``` r
+#choropleth map 
+ggplot(wards_incident) +
+  geom_sf(aes(fill = incident_density), colour = "white", linewidth = 0.2) +
+  scale_fill_viridis_c() +
+  labs(title = "Incident density by ward",fill = "Incidents\nper m²") +
+  theme_minimal()
+```
+
+![](coursework_02_files/figure-commonmark/task-1-code-2.png)
+
+``` r
 top_wards <- wards_incident %>% 
   st_drop_geometry() %>% 
   arrange(desc(n_incidents)) %>% 
   select(ward_id,ward_name, n_incidents, incident_density) %>% 
   slice_head(n=5)
 
-top_wards %>%
-  mutate(incident_density = round(incident_density, 1)) %>%
-  kable(
-    col.names = c("Ward ID", "Ward", "Incidents", "Incident density"),
-    caption = "Highest incident wards by coordinate-based ward assignment."
-  )
-```
-
-| Ward ID | Ward        | Incidents | Incident density |
-|:--------|:------------|----------:|-----------------:|
-| W17     | Maple Cross |       337 |            222.9 |
-| W25     | Saffron Lea |       110 |            111.9 |
-| W08     | Market End  |        96 |             17.8 |
-| W11     | Hazel Row   |        95 |             55.6 |
-| W16     | Foxley      |        57 |             59.0 |
-
-Highest incident wards by coordinate-based ward assignment.
-
-``` r
 total_incidents = sum(wards_incident$n_incidents)
 
 top_10_share <- wards_incident %>%
@@ -135,27 +120,13 @@ top_10_share <- wards_incident %>%
   arrange(desc(n_incidents)) %>% 
   slice_head(n =10) %>% 
   summarise( share = (sum(n_incidents)/total_incidents) *100)
-top_10_share
-```
 
-    # A tibble: 1 × 1
-      share
-      <dbl>
-    1  86.4
-
-``` r
 top_5_share <-  wards_incident %>% 
   st_drop_geometry() %>% 
   arrange(desc(n_incidents)) %>% 
   slice_head(n=5) %>% 
   summarise ( share = (sum(n_incidents)/total_incidents)*100)
-top_5_share 
 ```
-
-    # A tibble: 1 × 1
-      share
-      <dbl>
-    1  70.4
 
 I converted the incident coordinates into an sf point layer using the
 same CRS as the ward polygons, then spatially joined each incident to
@@ -165,26 +136,26 @@ that differed from the coordinate-based ward assignment. Subsequent ward
 counts therefore use the spatially assigned ward, so the analysis
 reflects the actual incident locations.
 
-The incident records were treated as point pattern data, since each row
-records an event location. A 6 × 6 quadrat count showed strong spatial
-variation: the largest cell counts were in the north-east/eastern part
-of the city, while several southern and western cells had very low or
-zero counts. This suggests a non-homogeneous pattern rather than an even
-spatial distribution.
+The incident records were first treated as point pattern data, since
+each row records an event location. The kernel-smoothed intensity map
+shows a clear non-uniform pattern, with the highest intensity in the
+north-east/eastern region and much lower intensity across the south-west
+and outer areas.
 
-The kernel-smoothed intensity map confirmed the same pattern, with the
-highest intensity in the north-east/eastern region and much lower
-intensity across the south-west and outer areas. I then aggregated
-incidents to wards using the coordinate-based ward assignment to
-identify the administrative areas contributing most to this pattern.
-Maple Cross had the highest count, with 337 incidents and 222.9
-incidents per km², followed by Saffron Lea with 110 incidents and 111.9
-incidents per km². Market End, Hazel Row and Foxley also had high
-counts, with 96, 95 and 57 incidents respectively.
+I then aggregated incidents to wards to produce a lattice/areal summary
+of the same pattern. The ward choropleth confirms that the highest
+incident densities are concentrated in the same north-east/eastern part
+of the city. Since density was calculated using ward area in square
+metres, the values are small, but the relative pattern is still clear.
+
+Maple Cross had the highest count, with 337 incidents and the highest
+ward density, followed by Saffron Lea with 110 incidents. Market End,
+Hazel Row and Foxley also had high counts, with 96, 95 and 57 incidents
+respectively.
 
 The top five wards accounted for 70.4% of incidents and the top ten for
-86.4%, confirming that incidents are highly concentrated in a small
-number of wards.
+86.4%, confirming that incidents are concentrated in a small number of
+wards rather than evenly distributed across the city.
 
 # Task 2
 
@@ -199,7 +170,7 @@ wards_data = wards_incident %>%
 
 #PCA of profiles 
 
-#not keeping transport acces and listed building shares cuz thye have na values 
+#not keeping transport access and listed building shares beacuse they have NA values 
 PCA_profile_data <- wards_data %>% 
   st_drop_geometry() %>% 
   select(unemployment_rate,
@@ -213,43 +184,13 @@ profile_pca <- prcomp(PCA_profile_data, scale. = TRUE)
 
 var_explained <- profile_pca$sdev^2 / sum(profile_pca$sdev^2)
 
-scree_df <- data.frame(PC  = seq_along(var_explained),Var = var_explained)
-
-scree_plot <- ggplot(scree_df, aes(x = PC, y = Var)) +
-    geom_col(fill = "steelblue") +
-    geom_line(aes(y = cumsum(Var)), color = "red", linewidth = 1) +
-    geom_point(aes(y = cumsum(Var)), color = "red", size = 2) +
-    geom_hline(yintercept = 0.9, linetype = "dashed") +
-    scale_y_continuous(labels = scales::percent_format()) +
-    theme_bw() +
-    labs(
-        x = "Principal Component", y = "Variance Explained",
-        title = "Scree Plot — Ward profile")
-scree_plot
-```
-
-![](coursework_02_files/figure-commonmark/task-2-code-1.png)
-
-``` r
 library(patchwork)
 
 loadings <- data.frame(
     variable = rownames(profile_pca$rotation),
     PC1 = profile_pca$rotation[, 1],
-    PC2 = profile_pca$rotation[, 2]
-)
-loadings
-```
+    PC2 = profile_pca$rotation[, 2])
 
-                                   variable         PC1          PC2
-    unemployment_rate     unemployment_rate  0.49560981 -0.000705084
-    deprivation_score     deprivation_score  0.49276700 -0.016342217
-    rental_share               rental_share  0.48755124  0.045486436
-    population_density   population_density -0.04259719 -0.968350549
-    lighting_coverage     lighting_coverage -0.29435650 -0.122882153
-    distance_police_hub distance_police_hub  0.43056372 -0.211803235
-
-``` r
 pca_score <- data.frame( ward_id = wards_data$ward_id,
                          PC1 = profile_pca$x[,1],
                          PC2 = profile_pca$x[,2])
@@ -259,39 +200,26 @@ wards_data_pca <- wards_data %>%
 pc1_map <- ggplot(wards_data_pca) +
   geom_sf(aes(fill = PC1), colour = "white", linewidth = 0.2) +
   scale_fill_viridis_c() +
-  labs(
-    title = "PC1 score by ward",
-    fill = "PC1 score"
-  ) +
+  labs(fill = "PC1 score") +
   theme_minimal()
 
 pc2_map <- ggplot(wards_data_pca) +
   geom_sf(aes(fill = PC2), colour = "white" ,linewidth = 0.2) +
   scale_fill_viridis_c() +
-  labs(
-    title = "PC2 score by ward",
-    fill = "PC2 score"
-  ) +
+  labs(fill = "PC2 score") +
   theme_minimal()
 
-pc1_map + pc2_map
+(pc1_map + pc2_map) + 
+  plot_annotation(title = "PC1 and PC2 scores by ward", 
+                  theme = theme(plot.title = element_text(hjust = 0.5, face = "bold")))
 ```
 
-![](coursework_02_files/figure-commonmark/task-2-code-2.png)
+![](coursework_02_files/figure-commonmark/task-2-code-1.png)
 
 ``` r
 cor_pc1 <- cor(wards_data_pca$incident_density , wards_data_pca$PC1, use = "complete.obs")
 cor_pc2 <- cor(wards_data_pca$incident_density, wards_data_pca$PC2, use = "complete.obs")
-cor_pc1
 ```
-
-    [1] 0.4197748
-
-``` r
-cor_pc2
-```
-
-    [1] -0.3906488
 
 As a supplementary ward-level analysis, I used PCA to summarise the
 neighbourhood profile variables. I excluded transport_access and
@@ -355,7 +283,7 @@ task3_table <- bind_rows(
 
 task3_table %>%
   mutate(
-    incident_density = round(incident_density, 1),
+    incident_density = incident_density,
     profile_score = round(profile_score, 2),
     PC1 = round(PC1, 2),
     PC2 = round(PC2, 2),
@@ -366,16 +294,26 @@ task3_table %>%
   ) %>%
   kable(
     col.names = c(
-      "Group", "Ward", "Incidents", "Incidents per km²", "Profile score",
+      "Group", "Ward", "Incidents", "Incidents per m²", "Profile score",
       "PC1", "PC2", "Deprivation", "Unemployment", "Lighting", "Police distance"
     ),
     caption = "Priority and comparison wards based on incident burden and PCA neighbourhood-profile evidence."
   )
 ```
 
+| Group | Ward | Incidents | Incidents per m² | Profile score | PC1 | PC2 | Deprivation | Unemployment | Lighting | Police distance |
+|:---|:---|---:|---:|---:|---:|---:|---:|---:|---:|---:|
+| Priority | Maple Cross | 337 | 0.0002229 | 3.90 | 3.08 | -0.81 | 83.5 | 15.8 | 58.1 | 5 |
+| Priority | Saffron Lea | 110 | 0.0001119 | 2.56 | 1.21 | -1.35 | 61.1 | 12.1 | 65.4 | 4 |
+| Comparison | Bracken Vale | 0 | 0.0000000 | -3.15 | -3.54 | -0.39 | 16.0 | 3.3 | 97.1 | 0 |
+| Comparison | Canal Side | 0 | 0.0000000 | -2.20 | -2.94 | -0.73 | 23.2 | 3.6 | 96.4 | 1 |
+
+Priority and comparison wards based on incident burden and PCA
+neighbourhood-profile evidence.
+
 The clearest priority areas are Maple Cross and Saffron Lea. Maple Cross
-had 337 incidents and 222.9 incidents per km², while Saffron Lea had 110
-incidents and 111.9 incidents per km². Both also had positive PCA
+had 337 incidents and 0.0002229 incidents per m², while Saffron Lea had
+110 incidents and 0.0001119 incidents per m². Both also had positive PCA
 profile scores, while the comparison wards Bracken Vale and Canal Side
 had no incidents and negative profile scores.
 
@@ -405,4 +343,4 @@ investigation and intervention, not causal claims.
 
 Add references only if needed.
 
-    **Prose Word Count:** 844 words (156 words under the 1000-word limit)
+    **Prose Word Count:** 836 words (164 words under the 1000-word limit)
