@@ -32,17 +32,13 @@ profiles_clean <- profiles %>%
 ```
 
 I loaded the ward boundary polygons, ward profile data and incident
-reports.
-
-The incident and ward polygon files had no missing values, while the
-ward profile file had 6 missing values; these were retained and handled
-using available cases where relevant.
-
-I converted rental_share from percentage text to a numeric variable.
-
-I also standardized ward names in the profile file by replacing hyphens
-with spaces, although later joins use ward_id rather than ward_name to
-avoid relying on name formatting.
+reports. The incident and ward polygon files had no missing values,
+while the ward profile file had 6 missing values; these were retained
+and handled using available cases where relevant. I converted
+rental_share from percentage text to a numeric variable. I also
+standardized ward names in the profile file by replacing hyphens with
+spaces, although later joins use ward_id rather than ward_name to avoid
+relying on name formatting.
 
 # Task 1
 
@@ -80,7 +76,7 @@ wards_incident <- wards %>%
          area_m2 = as.numeric(st_area(geometry)),
          incident_density =  n_incidents / area_m2)
 
-#kernel-smoothed intensity for ppp and quadrat
+#kernel-smoothed intensity for ppp
 wards_window <- as.owin(st_union(wards))
 incident_coords = st_coordinates(incidents_sf)
 incident_ppp <-  ppp( x = incident_coords[,1] , y =incident_coords[,2] , window = wards_window)
@@ -233,8 +229,8 @@ The PC1 loadings were positive for unemployment rate, deprivation score,
 rental share and distance from the police hub, and negative for lighting
 coverage. I therefore interpret PC1 as a broad social-pressure and
 weaker-safety-infrastructure component. PC2 was dominated by a large
-negative loading for population density, so it mainly represents an
-inverse relationship with population-density.
+negative loading for population density,so lower PC2 scores represent
+higher-density wards.
 
 The spatial maps of PC1 and PC2 scores partly align with the incident
 pattern from Task 1. High PC1 scores occur across the northern part of
@@ -344,4 +340,4 @@ investigation and intervention, not causal claims.
 
 Add references only if needed.
 
-    **Prose Word Count:** 835 words (165 words under the 1000-word limit)
+    **Prose Word Count:** 833 words (167 words under the 1000-word limit)
