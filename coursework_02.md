@@ -138,7 +138,7 @@ reflects the actual incident locations.
 
 The incident records were first treated as point pattern data, since
 each row records an event location. The kernel-smoothed intensity map
-shows a clear non-homogenous pattern, with the highest intensity in the
+shows a clear non-homogeneous pattern, with the highest intensity in the
 north-east/eastern region and much lower intensity across the south-west
 and outer areas.
 
