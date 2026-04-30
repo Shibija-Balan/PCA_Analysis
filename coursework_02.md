@@ -138,15 +138,15 @@ reflects the actual incident locations.
 
 The incident records were first treated as point pattern data, since
 each row records an event location. The kernel-smoothed intensity map
-shows a clear non-uniform pattern, with the highest intensity in the
+shows a clear non-homogenous pattern, with the highest intensity in the
 north-east/eastern region and much lower intensity across the south-west
 and outer areas.
 
-I then aggregated incidents to wards to produce a lattice/areal summary
-of the same pattern. The ward choropleth confirms that the highest
-incident densities are concentrated in the same north-east/eastern part
-of the city. Since density was calculated using ward area in square
-metres, the values are small, but the relative pattern is still clear.
+I then aggregated incidents to wards to produce a lattice summary of the
+same pattern. The ward choropleth confirms that the highest incident
+densities are concentrated in the same north-east/eastern part of the
+city. Since density was calculated using ward area in square metres, the
+values are small, but the relative pattern is still clear.
 
 Maple Cross had the highest count, with 337 incidents and the highest
 ward density, followed by Saffron Lea with 110 incidents. Market End,
@@ -221,20 +221,20 @@ cor_pc1 <- cor(wards_data_pca$incident_density , wards_data_pca$PC1, use = "comp
 cor_pc2 <- cor(wards_data_pca$incident_density, wards_data_pca$PC2, use = "complete.obs")
 ```
 
-As a supplementary ward-level analysis, I used PCA to summarise the
-neighbourhood profile variables. I excluded transport_access and
-listed_building_share because they contained missing values, so the PCA
-used the complete profile variables only. The variables were
-standardised before PCA. PC1 explained 64.9% of the variation in the
-selected ward-profile variables, and PC1 and PC2 together explained
-82.1%.
+I used PCA to summarise the neighbourhood profile variables. I excluded
+transport_access and listed_building_share from the PCA because they
+contained missing values (this avoided dropping any wards from the PCA).
+The variables were standardised before PCA.
+
+PC1 explained 64.9% of the variation in the selected ward-profile
+variables, and PC1 and PC2 together explained 82.1%.
 
 The PC1 loadings were positive for unemployment rate, deprivation score,
 rental share and distance from the police hub, and negative for lighting
 coverage. I therefore interpret PC1 as a broad social-pressure and
 weaker-safety-infrastructure component. PC2 was dominated by a large
-negative loading for population density, so it mainly represents a
-population-density contrast.
+negative loading for population density, so it mainly represents an
+inverse relationship with population-density.
 
 The spatial maps of PC1 and PC2 scores partly align with the incident
 pattern from Task 1. High PC1 scores occur across the northern part of
@@ -318,19 +318,20 @@ profile scores, while the comparison wards Bracken Vale and Canal Side
 had no incidents and negative profile scores.
 
 The PCA evidence suggests that the most relevant short-term actions are
-linked to safety infrastructure rather than broad structural
-variables.PC1 loaded positively on distance from the police hub and
-negatively on lighting coverage, so higher PC1 scores partly reflect
-wards that are further from police infrastructure and less well lit.
-Maple Cross had police-hub distance 5 and lighting coverage 58.1, while
-Saffron Lea had distance 4 and lighting coverage 65.4. In contrast,
-Bracken Vale and Canal Side had police-hub distances 0 and 1 and
-lighting coverage 97.1 and 96.4.
+linked to safety infrastructure rather than broad structural variables.
+PC1 loaded positively on distance from the police hub and negatively on
+lighting coverage, so higher PC1 scores partly reflect wards that are
+further from police infrastructure and less well lit. Maple Cross had
+police-hub distance 5 and lighting coverage 58.1, while Saffron Lea had
+distance 4 and lighting coverage 65.4. In contrast, Bracken Vale and
+Canal Side had police-hub distances 0 and 1 and lighting coverage 97.1
+and 96.4.
 
 The main recommendation is therefore to prioritise local police response
 coverage in the Maple Cross/Saffron Lea hotspot, for example through
-patrol routing or a local reporting access. A second recommendation is
-to review lighting coverage, especially in Maple Cross.
+revised patrol routing or improved local reporting access. A second
+recommendation is to review lighting coverage, especially in Maple
+Cross.
 
 Deprivation and unemployment support the case for prioritising these
 wards, but they are longer-term structural issues rather than immediate
@@ -343,4 +344,4 @@ investigation and intervention, not causal claims.
 
 Add references only if needed.
 
-    **Prose Word Count:** 836 words (164 words under the 1000-word limit)
+    **Prose Word Count:** 835 words (165 words under the 1000-word limit)
