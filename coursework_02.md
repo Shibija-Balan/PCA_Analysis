@@ -166,7 +166,7 @@ wards_data = wards_incident %>%
 
 #PCA of profiles 
 
-#not keeping transport access and listed building shares beacuse they have NA values 
+#not keeping transport access and listed building shares because they have NA values 
 PCA_profile_data <- wards_data %>% 
   st_drop_geometry() %>% 
   select(unemployment_rate,
