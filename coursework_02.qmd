@@ -203,7 +203,7 @@ The PC1 loadings were positive for unemployment rate, deprivation score, rental 
 
 The spatial maps of PC1 and PC2 scores partly align with the incident pattern from Task 1. High PC1 scores occur across the northern part of the city, while low PC2 scores, corresponding to higher population density (because PC2 had a large negative population-density loading) are more evident towards the east. This is consistent with the north-east/eastern incident hotspot being associated with both social pressure and density. 
 
-However, the associations with incident density are only moderate: r = 0.420 for PC1 and r = -0.391 for PC2. Therefore, the ward-profile variables provide partial support for the hotspot explanation, but they do not fully explain the sharp concentration of incidents.
+However, the associations with incident density are only moderate: r=0.420 for PC1 and r=-0.391 for PC2 (where r is the correlation coefficient). Therefore, the ward-profile variables provide partial support for the hotspot explanation, but they do not fully explain the sharp concentration of incidents.
 
 # Task 3
 

@@ -240,10 +240,11 @@ are more evident towards the east. This is consistent with the
 north-east/eastern incident hotspot being associated with both social
 pressure and density.
 
-However, the associations with incident density are only moderate: r =
-0.420 for PC1 and r = -0.391 for PC2. Therefore, the ward-profile
-variables provide partial support for the hotspot explanation, but they
-do not fully explain the sharp concentration of incidents.
+However, the associations with incident density are only moderate:
+r=0.420 for PC1 and r=-0.391 for PC2 (where r is the correlation
+coefficient). Therefore, the ward-profile variables provide partial
+support for the hotspot explanation, but they do not fully explain the
+sharp concentration of incidents.
 
 # Task 3
 
@@ -340,4 +341,4 @@ investigation and intervention, not causal claims.
 
 Add references only if needed.
 
-    **Prose Word Count:** 833 words (167 words under the 1000-word limit)
+    **Prose Word Count:** 839 words (161 words under the 1000-word limit)
