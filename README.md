@@ -1,27 +1,43 @@
-# MA22019 Coursework 2 Repository
+# Spatial Incident Analysis with PCA
 
-This private repository stores your Coursework 2 work.
+An R-based geospatial data science project analysing the spatial concentration of incidents across urban wards and investigating whether neighbourhood characteristics help explain the observed pattern.
 
-## Main Files
+## Project overview
 
-- `coursework_02_instructions.md`: the main brief document
-- `coursework_02.qmd`: the file where you should write your code and answers
-- `coursework_02.Rproj`: the RStudio project file
-- `data/`: the coursework datasets
+The analysis combines point-pattern methods, spatial joins, ward-level incident densities and principal component analysis (PCA). It identifies geographic hotspots, summarises neighbourhood characteristics into lower-dimensional components and uses those results to motivate evidence-based priority areas.
 
-## Submission
+## Methods
 
-Your final submission should include:
+- Spatial data handling with `sf`
+- Coordinate-to-polygon spatial joins
+- Point-pattern analysis and kernel-smoothed intensity estimation
+- Ward-level incident counts and density calculations
+- Choropleth mapping with `ggplot2`
+- PCA on standardised neighbourhood-profile variables
+- Interpretation of PCA loadings and ward scores
+- Correlation analysis between incident density and principal components
+- Evidence-based prioritisation using both incident burden and neighbourhood profiles
 
-- `coursework_02.qmd`
-- `coursework_02.md`
-- `coursework_02_files/`
-- `data/`
+## Selected findings
 
-Complete your work in `coursework_02.qmd`, follow the instructions in
-`coursework_02_instructions.md`, and render the file so that
-`coursework_02.md` and `coursework_02_files/` are created.
-The `coursework_02_files/` folder will usually only appear once your render
-includes figures or other embedded output files.
+- Incident locations were highly concentrated rather than evenly distributed across the city.
+- The five highest-count wards accounted for approximately 70% of recorded incidents, while the top ten accounted for approximately 86%.
+- PCA reduced several neighbourhood characteristics into interpretable dimensions associated with social pressure, safety infrastructure and population density.
+- The first two principal components explained most of the variation in the selected neighbourhood-profile variables, but their correlations with incident density were only moderate. This suggests that neighbourhood characteristics provide a partial rather than complete explanation of the spatial hotspot.
+- The analysis identified Maple Cross and Saffron Lea as priority areas and recommended investigation of local response coverage and lighting infrastructure while avoiding causal claims from observational data.
 
-Do not complete or submit Coursework 2 inside the `materials` repository.
+## Repository structure
+
+- `coursework_02.qmd` — source analysis in Quarto/R
+- `coursework_02.md` — rendered GitHub-friendly report
+- `coursework_02_files/` — generated figures and supporting render files
+- `data/` — spatial and tabular datasets used by the analysis
+- `coursework_02.Rproj` — RStudio project file
+
+## Tools
+
+R, sf, spatstat, tidyverse, ggplot2, patchwork, knitr
+
+## Notes
+
+This project was originally developed as university data science coursework and has been cleaned for portfolio presentation. The recommendations are prioritisation hypotheses based on observational evidence, not causal conclusions.
